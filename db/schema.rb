@@ -26,7 +26,7 @@ ActiveRecord::Schema.define(version: 20150703152243) do
     t.string   "lims_id",                             null: false, comment: "Identifier for the originating LIMS. eg. SQSCP for Sequencesacape"
   end
 
-  add_index "barcodes", ["barcodable_uuid", "barcodable_type"], name: "index_barcodes_on_barcodable_uuid_and_barcodable_type", unique: true, using: :btree
-  add_index "barcodes", ["machine_readable_barcode", "barcodable_type"], name: "index_barcodes_on_machine_readable_barcode_and_barcodable_type", unique: true, using: :btree
+  add_index "barcodes", ["barcodable_uuid", "barcode_type"], name: "index_barcodes_on_barcodable_uuid_and_barcode_type", unique: true, using: :btree
+  add_index "barcodes", ["machine_readable_barcode", "barcode_type"], name: "index_barcodes_on_machine_readable_barcode_and_barcode_type", unique: true, using: :btree
 
 end

@@ -1,12 +1,14 @@
 shared_examples_for 'a component resource' do |components|
   let(:originally_created_at) { Time.parse('2012-Mar-16 12:06') }
   let(:timestamped_json) { json.merge("created_at" => originally_created_at, "updated_at" => originally_created_at) }
+  let(:new_timestamped_json) { updated_json.merge("created_at" => originally_created_at, "updated_at" => originally_created_at) }
   let(:modified_at) { originally_created_at + 1.day }
   let(:checked_time_now) { Time.parse('2012-Mar-26 13:20').utc }
   let(:checked_time_then) { Time.parse('2012-Mar-25 13:20').utc }
   let(:example_lims) { 'example' }
 
   let(:attributes) { described_class.send(:json).new(timestamped_json) }
+  let(:new_attributes) { described_class.send(:json).new(new_timestamped_json) }
 
   def current_records
     ActiveRecord::Base.connection.select_all("SELECT * FROM #{described_class.table_name}")
@@ -16,15 +18,17 @@ shared_examples_for 'a component resource' do |components|
 
     context 'from different lims' do
 
+      # For all existing uses a different LIMS, with the same component identifiers, shouldn't be broadcasting
+      # new records. If it does we probably DO want to deadletter it, as it indicates a problem.
+
       let(:second_lims) { 'example_2' }
 
       before(:each) do
         described_class.create_or_update_from_json(timestamped_json.merge("updated_at" => modified_at), example_lims)
-        described_class.create_or_update_from_json(timestamped_json.merge("updated_at" => modified_at), second_lims)
       end
 
-      it 'creates multiple records' do
-        expect(current_records.count).to eq(2)
+      it 'raises an exception' do
+        expect { described_class.create_or_update_from_json(timestamped_json.merge("updated_at" => modified_at), second_lims) }.to raise_error(ActiveRecord::RecordNotUnique)
       end
     end
 
@@ -111,6 +115,20 @@ shared_examples_for 'a component resource' do |components|
           end
         end
       end
+
+      components.each do |changeable,changeable_value|
+        context "when #{changeable} changes" do
+          before(:each) do
+            described_class.send(:create_or_update, new_attributes.merge("updated_at" => modified_at + 2.hours, :lims_id=>example_lims, changeable.to_s => changeable_value))
+          end
+
+          it 'creates a new record' do
+            expect(current_records.count).to eq(2)
+            expect(current_records.last['last_updated']).to eq(modified_at + 2.hours )
+          end
+        end
+      end
+
     end
   end
 end
