@@ -16,7 +16,7 @@ module NestedResourceTools
 
       base_resource = attributes.first
 
-      lims      = base_resource.id_lims
+      lims      = base_resource.lims_id
       id_x_lims = base_resource["id_#{name.underscore}_lims"]
 
       all_records = for_lims(lims).with_id(id_x_lims)

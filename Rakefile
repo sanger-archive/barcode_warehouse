@@ -4,4 +4,4 @@
 
 require File.expand_path('../config/application', __FILE__)
 
-UnifiedWarehouse::Application.load_tasks
+BarcodeWarehouse::Application.load_tasks

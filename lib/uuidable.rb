@@ -15,7 +15,7 @@ module Uuidable
     def self.included(base)
       base.class_eval do
         alias_method_chain(:new_column, :uuid)
-        const_set(:UuidColumn, Class.new(base::Column) { extend UuidColumnBehaviour })
+        const_set(:UuidColumn, Class.new(base::Column) { include UuidColumnBehaviour })
 
         alias_method_chain(:type_to_sql, :uuid)
       end
@@ -23,33 +23,36 @@ module Uuidable
 
     # Ensures that a UUID column converts the values appropriately
     module UuidColumnBehaviour
-      def string_to_binary(value)
-        value.to_uuid
+
+      def type_cast(value)
+        value.to_uuid!
       end
+
 
       def binary_to_string(value)
         value.from_uuid
       end
+
     end
 
-    # Ensures that any BINARY(16) columns are considered to be UUIDs, converting their values to
+    # Ensures that any BINARY(16)||varbinary(16) columns are considered to be UUIDs, converting their values to
     # and from strings.
-    def new_column_with_uuid(field, default, type, null, collation)
-      constructor = (type == 'binary(16)') ? self.class::UuidColumn.method(:new) : method(:new_column_without_uuid)
-      constructor.call(field, default, type, null, collation)
+    def new_column_with_uuid(field, default, type, null, collation, extra)
+      constructor = (type == 'varbinary(16)') ? self.class::UuidColumn.method(:new) : method(:new_column_without_uuid)
+      constructor.call(field, default, type, null, collation, extra)
     end
 
     # MySQL adapter forces BINARY columns into BLOBs which is exactly what we don't need here otherwise
     # our indexes get all messed up.  So force the correct column type.
     def type_to_sql_with_uuid(type, limit = nil, precision = nil, scale = nil)
-      (type.to_s == 'binary' && limit == 16) ? 'binary(16)' : type_to_sql_without_uuid(type, limit, precision, scale)
+      (type.to_s == 'binary' && limit == 16) ? 'varbinary(16)' : type_to_sql_without_uuid(type, limit, precision, scale)
     end
   end
 
   # Extensions to the Ruby core classes to provide conversions to and from BINARY(16) UUIDs.
   module Extensions
     module NilClass
-      def to_uuid
+      def to_uuid!
         nil
       end
 
@@ -63,11 +66,12 @@ module Uuidable
 
       # Returns a binary representation of this UUID string.  It will raise a NonUuidError if the string is
       # neither in the character nor the binary format.
-      def to_uuid
-        try_string_to_binary { |_,binary| return binary }
-        try_binary_to_string { |_,binary| return binary }
+      def to_uuid!
+        try_string_to_binary { |_,binary| self.replace(binary); return self }
+        try_binary_to_string { |_,binary| self.replace(binary); return self }
         raise NonUuidError, self
       end
+
 
       # Returns a character representation of this binary UUID string.  It will raise a NonUuidError if the
       # string is neither in the character nor the binary format.

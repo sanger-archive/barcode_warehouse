@@ -11,7 +11,7 @@ gem "rest-client"
 gem "migration_comments"
 
 # The gems commented out below were part of warehouse_two/three
-# The extra support they provided is not needed for the unified warehouse, leaving them here
+# The extra support they provided is not needed for the barcode warehouse, leaving them here
 # as an active reminder to avoid someone re-implementing the wheel if we need them in future
 
 # We have to use composite primary keys because of the table partitioning

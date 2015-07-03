@@ -18,8 +18,8 @@ module ResourceTools::Association
 
           associate = #{association.to_s.classify}.with_uuid(#{association}_uuid).first or
             raise(ActiveRecord::RecordNotFound, uuid_error % #{association}_uuid) unless #{association}_uuid.blank?
-          associate ||= #{association.to_s.classify}.for_lims(id_lims).with_id(#{association}_id).first or
-            raise(ActiveRecord::RecordNotFound, id_error % [id_lims,#{association}_id]) unless #{association}_id.blank?
+          associate ||= #{association.to_s.classify}.for_lims(lims_id).with_id(#{association}_id).first or
+            raise(ActiveRecord::RecordNotFound, id_error % [lims_id,#{association}_id]) unless #{association}_id.blank?
           self.#{association}= associate unless associate.nil?
         end
 

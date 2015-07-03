@@ -57,7 +57,7 @@ module ResourceTools::CoreExtensions
 
     module ClassMethods
       def numeric_tolerance
-        @numeric_tolerance ||= UnifiedWarehouse::Application.config.numeric_tolerance
+        @numeric_tolerance ||= BarcodeWarehouse::Application.config.numeric_tolerance
       end
     end
 
