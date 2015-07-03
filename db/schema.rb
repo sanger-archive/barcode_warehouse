@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150703091635) do
+ActiveRecord::Schema.define(version: 20150703152243) do
 
   create_table "barcodes", force: true do |t|
     t.string   "machine_readable_barcode",            null: false, comment: "The barcode as read by a scanner"
@@ -25,5 +25,8 @@ ActiveRecord::Schema.define(version: 20150703091635) do
     t.datetime "deleted_at",                                       comment: "Date at which the barcodeable was destroyed"
     t.string   "lims_id",                             null: false, comment: "Identifier for the originating LIMS. eg. SQSCP for Sequencesacape"
   end
+
+  add_index "barcodes", ["barcodable_uuid", "barcodable_type"], name: "index_barcodes_on_barcodable_uuid_and_barcodable_type", unique: true, using: :btree
+  add_index "barcodes", ["machine_readable_barcode", "barcodable_type"], name: "index_barcodes_on_machine_readable_barcode_and_barcodable_type", unique: true, using: :btree
 
 end
