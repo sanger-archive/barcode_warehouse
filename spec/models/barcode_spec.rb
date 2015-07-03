@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Barcode do
   context 'with uuid' do
-    it_behaves_like 'a component resource'
+    it_behaves_like 'a component resource', [:barcodable_uuid, :barcodable_type]
 
 
     let(:json) do

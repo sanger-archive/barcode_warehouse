@@ -1,4 +1,4 @@
-shared_examples_for 'a singular resource' do
+shared_examples_for 'a component resource' do |components|
   let(:originally_created_at) { Time.parse('2012-Mar-16 12:06') }
   let(:timestamped_json) { json.merge("created_at" => originally_created_at, "updated_at" => originally_created_at) }
   let(:modified_at) { originally_created_at + 1.day }
@@ -20,7 +20,7 @@ shared_examples_for 'a singular resource' do
 
       before(:each) do
         described_class.create_or_update_from_json(timestamped_json.merge("updated_at" => modified_at), example_lims)
-        described_class.create_or_update_from_json(timestamped_json.merge("updated_at" => modified_at, "uuid" =>'other'), second_lims)
+        described_class.create_or_update_from_json(timestamped_json.merge("updated_at" => modified_at), second_lims)
       end
 
       it 'creates multiple records' do
@@ -114,5 +114,3 @@ shared_examples_for 'a singular resource' do
     end
   end
 end
-
-
